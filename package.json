@@ -1,0 +1,23 @@
+{
+  "name": "rename-images",
+  "version": "1.0.0",
+  "description": "",
+  "main": "rename-images.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yihsiu806/rename-images.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yihsiu806/rename-images/issues"
+  },
+  "homepage": "https://github.com/yihsiu806/rename-images#readme",
+  "dependencies": {
+    "chalk": "^4.1.0"
+  }
+}

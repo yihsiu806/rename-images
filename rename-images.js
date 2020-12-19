@@ -72,11 +72,16 @@ async function renameImages(folderPath) {
     })
     
     function generateRandomName() {
-        const letterStart = 'a'.codePointAt(0)
-        const letterSize = 'z'.codePointAt(0) - 'a'.codePointAt(0) + 1
-        const letters = Array(letterSize).fill(0).map((_, i) => {
+        let letterStart = 'a'.codePointAt(0)
+        let letterSize = 'z'.codePointAt(0) - 'a'.codePointAt(0) + 1
+        let letters = Array(letterSize).fill(0).map((_, i) => {
             return String.fromCodePoint(letterStart + i)
         })
+        letterStart = 'A'.codePointAt(0)
+        letterSize = 'Z'.codePointAt(0) - 'A'.codePointAt(0) + 1
+        letters = letters.concat(Array(letterSize).fill(0).map((_, i) => {
+            return String.fromCodePoint(letterStart + i)
+        }))
 
         let randomName = getRandomString()
         while (bucket.includes(randomName)) {
@@ -87,7 +92,7 @@ async function renameImages(folderPath) {
         return randomName
 
         function getRandomString() {
-            return Array(7).fill(0).reduce((acc, cur) => {
+            return Array(8).fill(0).reduce((acc, cur) => {
                 return acc + letters[Math.round(Math.random() * letterSize)]
             }, '')
         }
@@ -98,4 +103,3 @@ async function renameImages(folderPath) {
         return Math.round(stats.birthtimeMs / 1000)
     }
 }
-
