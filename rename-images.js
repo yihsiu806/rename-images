@@ -3,13 +3,11 @@ const path = require('path')
 const fs = require('fs')
 const chalk = require('chalk')
 
-const IMAGE_EXTS = ['png', 'jpg', 'git', 'jpeg']
-
 main()
 
-async function main() {
+function main() {
     targetFolder = checkCommandLineArgument()
-    targetFolder = await checkFolder(targetFolder)
+    targetFolder = checkFolder(targetFolder)
     renameImages(targetFolder)
 }
 
@@ -24,51 +22,66 @@ function checkCommandLineArgument() {
     return target
     
     function printHelp() {
-        console.log('Help:')
-        console.log(`    node ${programeName} path-to-target-forder`)
+        console.log('Usage')
+        console.log(`    node ${programeName} <path-to-target-forder>`)
         process.exit(0)
     }
 }
 
-async function checkFolder(target) {
+function checkFolder(target) {
     let absolutePath = path.resolve(target)
-    try {
-        const stats = await getFileStat()
-        if (!stats.isDirectory()) {
-            console.log(`Error: "${absolutePath}" is not a folder.`)
-        }
-        return absolutePath
-    } catch(err) {
-        console.log(err)
+    let stats = fs.statSync(absolutePath)
+    if (!stats.isDirectory()) {
+        console.log(`Error: "${absolutePath}" is not a folder.`)
         process.exit(1)
     }
-
-    function getFileStat() {
-        return new Promise((resolve, reject) => {
-            fs.stat(absolutePath, (err, stats) => {
-                if (err) {
-                    reject(err)
-                } else {
-                    resolve(stats)
-                }
-            })
-        })
-    }
+    return absolutePath
 }
 
-async function renameImages(folderPath) {
-    let bucket = []
+function renameImages(folderPath) {
     let files = fs.readdirSync(folderPath)
-    files = files.filter(fileName => {
-        return IMAGE_EXTS.includes(fileName.replace(/^.*\./, ''))
+
+    files.forEach((fileName, i) => {
+        let filePath = path.join(folderPath, fileName)
+        files[i] = {
+            fileName: fileName,
+            filePath: filePath,
+            fileType: getFileType(filePath)
+        }
     })
 
+    files.filter((fObj) => {
+        return fObj.fileType != null
+    })
+
+    function getFileType(path) {
+        let data = fs.readFileSync(path)
+        let bytes = []
+        for (let i = 0; i < 4; i++) {
+            bytes.push(data[i].toString(16))
+        }
+        let signature = bytes.join('').toUpperCase()
+        switch(signature) {
+            case '89504E47':
+                return 'png'
+            case '47494638':
+                return 'gif'
+            case 'FFD8FFDB':
+            case 'FFD8FFE0':
+            case 'FFD8FFE1':
+                return 'jpg'
+            default:
+                return null
+        }
+    }
+
+    let bucket = []
+
     console.log(chalk.cyan(`In ${folderPath}:`))
-    files.forEach((fileName) => {
-        let filePath = path.join(folderPath, fileName)
-        let newFileName = getBirthTime(filePath) + '-' + generateRandomName() + path.extname(fileName)
-        console.log(chalk.yellow(`Rename ${chalk.gray(`"${fileName}"`)} to ${chalk.white(`${newFileName}`)}`))
-        fs.renameSync(filePath, path.join(folderPath, newFileName))
+    files.forEach((fObj) => {
+        let newFileName = getBirthTime(fObj.filePath) + '-' + generateRandomName() + '.' + fObj.fileType
+        console.log(chalk.yellow(`Rename ${chalk.gray(`"${fObj.fileName}"`)} to ${chalk.white(`${newFileName}`)}`))
+        fs.renameSync(fObj.filePath, path.join(folderPath, newFileName))
     })
     
     function generateRandomName() {
