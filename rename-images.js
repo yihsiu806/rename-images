@@ -12,7 +12,7 @@ function main() {
 }
 
 function checkCommandLineArgument() {
-    let programeName = process.argv[1].replace(/^.*\//, '')
+    let programName = process.argv[1].replace(/^.*\//, '')
     let target = process.argv[2]
 
     if (target == undefined || target == '-h' || target == '--help') {
@@ -23,7 +23,7 @@ function checkCommandLineArgument() {
     
     function printHelp() {
         console.log('Usage')
-        console.log(`    node ${programeName} <path-to-target-forder>`)
+        console.log(`    node ${programName} <path-to-target-folder>`)
         process.exit(0)
     }
 }
